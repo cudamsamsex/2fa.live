@@ -4,44 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.0.3/otpauth.umd.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; text-align: center; }
-        textarea { width: 100%; height: 60px; margin: 10px 0; font-size: 16px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/speakeasy/2.0.0/speakeasy.min.js"></script>
 </head>
 <body>
-    <h2>2FA Generator</h2>
-    <label><b>2FA Secret</b></label>
-    <textarea id="secretInput" placeholder="Enter your 2FA Secret..."></textarea>
-    <button onclick="generateCode()">Submit</button>
+    <label><b>2FA Secret</b> Get code for 2 factor authentication easiest - Please store your 2FA secret safely</label>
+    <textarea id="secret" rows="2"></textarea>
+    <button id="submit">Submit</button>
     
-    <label><b>2FA Code</b></label>
-    <textarea id="codeOutput" readonly placeholder="2FA Code will appear here..."></textarea>
-    <button onclick="copyToClipboard()">Copy</button>
-    
+    <label><b>2FA Code</b> 2-step verification code</label>
+    <textarea id="code" rows="2" readonly></textarea>
+    <button id="copy">Copy</button>
+
     <script>
-        function generateCode() {
-            const secret = document.getElementById('secretInput').value.replace(/\s+/g, '');
-            if (!secret) {
-                alert('Please enter a 2FA Secret');
+        document.getElementById("submit").addEventListener("click", function () {
+            const secretInput = document.getElementById("secret").value.trim(); // Xóa khoảng trắng
+            if (!secretInput || secretInput.length < 16) {
+                alert("Invalid 2FA Secret! Please check again.");
                 return;
             }
+
             try {
-                const totp = new OTPAuth.TOTP({ secret });
-                document.getElementById('codeOutput').value = totp.generate();
+                const token = speakeasy.totp({
+                    secret: secretInput.replace(/\s+/g, ''), // Loại bỏ khoảng trắng
+                    encoding: "base32"
+                });
+                document.getElementById("code").value = token;
             } catch (error) {
-                alert('Invalid 2FA Secret!');
+                alert("Error generating 2FA code! Check secret format.");
+                console.error(error);
             }
-        }
-        
-        function copyToClipboard() {
-            const codeField = document.getElementById('codeOutput');
-            codeField.select();
-            document.execCommand('copy');
-            alert('Copied to clipboard!');
-        }
+        });
+
+        document.getElementById("copy").addEventListener("click", function () {
+            const codeInput = document.getElementById("code");
+            codeInput.select();
+            document.execCommand("copy");
+            alert("2FA code copied!");
+        });
     </script>
 </body>
 </html>
