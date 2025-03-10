@@ -4,53 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.0.3/otpauth.umd.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        input {
-            width: 300px;
-            padding: 10px;
-            margin: 10px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #otp {
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; text-align: center; }
+        textarea { width: 100%; height: 60px; margin: 10px 0; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/otpauth"></script>
 </head>
 <body>
-    <h1>2FA Code Generator</h1>
-    <input type="text" id="secret" placeholder="Enter your secret key" />
-    <button onclick="generateOTP()">Generate</button>
-    <div id="otp">Your OTP will appear here</div>
-
+    <h2>2FA Generator</h2>
+    <label><b>2FA Secret</b></label>
+    <textarea id="secretInput" placeholder="Enter your 2FA Secret..."></textarea>
+    <button onclick="generateCode()">Submit</button>
+    
+    <label><b>2FA Code</b></label>
+    <textarea id="codeOutput" readonly placeholder="2FA Code will appear here..."></textarea>
+    <button onclick="copyToClipboard()">Copy</button>
+    
     <script>
-        function generateOTP() {
-            const secret = document.getElementById('secret').value.trim();
+        function generateCode() {
+            const secret = document.getElementById('secretInput').value.replace(/\s+/g, '');
             if (!secret) {
-                alert('Please enter a secret key');
+                alert('Please enter a 2FA Secret');
                 return;
             }
-            
-            const totp = new OTPAuth.TOTP({
-                secret: OTPAuth.Secret.fromBase32(secret),
-                algorithm: 'SHA1',
-                digits: 6,
-                period: 30
-            });
-            
-            document.getElementById('otp').textContent = totp.generate();
+            try {
+                const totp = new OTPAuth.TOTP({ secret });
+                document.getElementById('codeOutput').value = totp.generate();
+            } catch (error) {
+                alert('Invalid 2FA Secret!');
+            }
+        }
+        
+        function copyToClipboard() {
+            const codeField = document.getElementById('codeOutput');
+            codeField.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
         }
     </script>
 </body>
