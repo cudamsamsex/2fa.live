@@ -10,38 +10,47 @@
             text-align: center;
             padding: 20px;
         }
-        input, button {
-            margin: 10px;
+        input {
+            width: 300px;
             padding: 10px;
+            margin: 10px;
             font-size: 16px;
         }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #otp {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.1.1/otpauth.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/otpauth"></script>
 </head>
 <body>
     <h1>2FA Code Generator</h1>
-    <input type="text" id="secret" placeholder="Enter Secret Key" />
-    <button onclick="generateCode()">Generate Code</button>
-    <h2 id="code">Your Code: </h2>
+    <input type="text" id="secret" placeholder="Enter your secret key" />
+    <button onclick="generateOTP()">Generate</button>
+    <div id="otp">Your OTP will appear here</div>
 
     <script>
-        async function generateCode() {
+        function generateOTP() {
             const secret = document.getElementById('secret').value.trim();
             if (!secret) {
-                alert('Please enter a secret key.');
+                alert('Please enter a secret key');
                 return;
             }
-            try {
-                const totp = new OTPAuth.TOTP({
-                    secret: secret,
-                    algorithm: 'SHA1',
-                    digits: 6,
-                    period: 30
-                });
-                document.getElementById('code').innerText = 'Your Code: ' + totp.generate();
-            } catch (error) {
-                alert('Invalid secret key.');
-            }
+            
+            const totp = new OTPAuth.TOTP({
+                secret: OTPAuth.Secret.fromBase32(secret),
+                algorithm: 'SHA1',
+                digits: 6,
+                period: 30
+            });
+            
+            document.getElementById('otp').textContent = totp.generate();
         }
     </script>
 </body>
